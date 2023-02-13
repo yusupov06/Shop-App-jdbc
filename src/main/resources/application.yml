@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: dev
+
+  datasource:
+    hikari:
+      connectionTimeout: 30000
+      idleTimeout: 600000
+      maxLifetime: 1800000
+
+server:
+  ssl:
+    enabled: true
+    key-store-type: PKCS12
+    key-store: classpath:keystore/baeldung.p12
+    key-store-password: password
+    key-alias: baeldung
+
+trust:
+  location: classpath:keystore/baeldung.p12
+  store:
+    password: password
+

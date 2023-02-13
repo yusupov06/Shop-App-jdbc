@@ -1,0 +1,30 @@
+
+server:
+  port: 8090
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shop_app2_db
+    username: postgres
+    password: 2002
+    driver-class-name: org.postgresql.Driver
+
+jwt:
+  access:
+    key: heruighurighviey84y57yuvhrjhvrhtvrhtvhjr8u4v8njvertvn8ut8veu834uvndjkwe
+    expiration-time: 7200000000
+  refresh:
+    key: evjrkhertvuheruth84y574y587yvbrhvjrtvhrjthv3u4895vuntervnjtkejrht89545y
+    expiration-time: 604800000
+
+app:
+  database:
+    mode: create
+    name: shop_app2_db
+  running: test
+  admin:
+    firstName: "MuhammadQodir"
+    phoneNumber: "+998931668648"
+    password: "123"

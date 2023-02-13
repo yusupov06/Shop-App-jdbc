@@ -1,0 +1,15 @@
+package uz.md.shopappjdbc.service.query;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class Pagination {
+    private int page;
+    private int pageCount;
+}
