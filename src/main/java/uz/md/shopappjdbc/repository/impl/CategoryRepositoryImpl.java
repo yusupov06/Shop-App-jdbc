@@ -1,6 +1,7 @@
 package uz.md.shopappjdbc.repository.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import uz.md.shopappjdbc.domain.Category;
@@ -113,7 +114,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         Assert.notNull(idList, "Ids must not be null");
         String ids = RepositoryUtil.getAsString(idList);
         List<Category> query = jdbcTemplate.query(
-                "select u.id from category u where (u.deleted = false) and u.id in ",
+                "select u.id from category u where (u.deleted = false) and u.id in ?",
                 new CategoryMapper(), ids);
 
         setProducts(query);
@@ -170,7 +171,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     public boolean existsByName(String name) {
         Assert.notNull(name, "name must not be null");
         Boolean aBoolean = jdbcTemplate.queryForObject(
-                "select case when count(c)> 0 then true else false end from category c where deleted = false and c.name = ",
+                "select case when count(c)> 0 then true else false end from category c where deleted = false and c.name = ?",
                 Boolean.class, name);
         return aBoolean != null && aBoolean;
     }

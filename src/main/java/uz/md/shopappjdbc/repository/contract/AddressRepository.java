@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface AddressRepository extends CrudRepository<Address, Long> {
     Optional<Address> findByIdAndUserId(Long id, UUID user_id);
 

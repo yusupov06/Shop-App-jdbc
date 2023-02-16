@@ -2,6 +2,9 @@ package uz.md.shopappjdbc.repository.impl;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import uz.md.shopappjdbc.domain.Address;
@@ -11,6 +14,7 @@ import uz.md.shopappjdbc.repository.contract.AddressRepository;
 import uz.md.shopappjdbc.repository.contract.UserRepository;
 import uz.md.shopappjdbc.repository.rowMapper.AddressMapper;
 
+import java.sql.PreparedStatement;
 import java.util.*;
 
 @Repository
@@ -34,24 +38,34 @@ public class AddressRepositoryImpl implements AddressRepository {
 
         if (entity.getId() != null) {
             jdbcTemplate.update(
-                    "update address set city = ?, house_number = ?, street = ?, user_id = ? where id = ?) ",
+                    "update address set city = ?, house_number = ?, street = ?, user_id = ? where id = ?",
                     entity.getCity(),
                     entity.getHouseNumber(),
                     entity.getStreet(),
                     entity.getUser().getId(),
                     entity.getId());
+            return entity = findById(entity.getId()).orElse(null);
         } else {
-            jdbcTemplate.update(
-                    "insert into address(city, deleted, house_number, street, user_id) " +
-                            "values (?,?,?,?,?)",
-                    entity.getCity(),
-                    entity.isDeleted(),
-                    entity.getHouseNumber(),
-                    entity.getStreet(),
-                    entity.getUser().getId());
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            Address finalEntity = entity;
+            jdbcTemplate.update(con -> {
+                PreparedStatement statement = con.prepareStatement(
+                        "insert into address(city, deleted, house_number, street, user_id) " +
+                                "values (?,?,?,?,?)", new String[]{"id"});
+
+                statement.setString(1, finalEntity.getCity());
+                statement.setBoolean(2, finalEntity.isDeleted());
+                statement.setInt(3, finalEntity.getHouseNumber());
+                statement.setString(4, finalEntity.getStreet());
+                statement.setObject(5, finalEntity.getUser().getId());
+                return statement;
+            }, keyHolder);
+            return entity = findById(Objects
+                    .requireNonNull(keyHolder.getKey())
+                    .longValue())
+                    .orElse(null);
         }
-        entity = findTheLastSaved().orElse(null);
-    return entity;
+
     }
 
     private Optional<Address> findTheLastSaved() {
@@ -84,9 +98,6 @@ public class AddressRepositoryImpl implements AddressRepository {
                 new AddressMapper(), id);
 
         if (address != null) {
-//            address.setUser(userRepository
-//                    .findById(address.getUser().getId())
-//                    .orElse(null));
             return Optional.of(address);
         }
         return Optional.empty();
@@ -104,11 +115,9 @@ public class AddressRepositoryImpl implements AddressRepository {
     @Override
     public List<Address> findAll() {
 
-        List<Address> query = jdbcTemplate.query(
+        return jdbcTemplate.query(
                 "select * from address  where deleted = false",
                 new AddressMapper());
-//        setUser(query);
-        return query;
     }
 
     private void setUser(List<Address> query) {
@@ -124,13 +133,11 @@ public class AddressRepositoryImpl implements AddressRepository {
     public List<Address> findAllById(Iterable<Long> idList) {
         Assert.notNull(idList, "ids must not be null");
         String ids = RepositoryUtil.getAsString(idList);
-        List<Address> query = jdbcTemplate.query(
+
+        return jdbcTemplate.query(
                 "select * from address where deleted = false and id in ?",
                 new AddressMapper(),
                 ids);
-
-//        setUser(query);
-        return query;
 
     }
 
@@ -183,9 +190,6 @@ public class AddressRepositoryImpl implements AddressRepository {
                 new AddressMapper(), id, user_id);
 
         if (address != null) {
-//            address.setUser(userRepository
-//                    .findById(address.getUser().getId())
-//                    .orElse(null));
             return Optional.of(address);
         }
         return Optional.empty();
@@ -196,7 +200,6 @@ public class AddressRepositoryImpl implements AddressRepository {
         List<Address> addresses = jdbcTemplate.query(
                 "select * from address where deleted = false and user_id = ?",
                 new AddressMapper(), userId);
-//        setUser(addresses);
         return addresses;
     }
 }

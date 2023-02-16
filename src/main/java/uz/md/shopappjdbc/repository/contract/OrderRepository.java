@@ -14,7 +14,6 @@ import java.net.ContentHandler;
 import java.util.List;
 import java.util.UUID;
 
-@Repository
 public interface OrderRepository extends CrudRepository<Order, Long> {
 
     Page<Order> findAllByStatus(OrderStatus status,

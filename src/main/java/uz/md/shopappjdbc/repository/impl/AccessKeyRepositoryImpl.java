@@ -2,6 +2,9 @@ package uz.md.shopappjdbc.repository.impl;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import uz.md.shopappjdbc.domain.AccessKey;
@@ -11,6 +14,8 @@ import uz.md.shopappjdbc.repository.contract.AccessKeyRepository;
 import uz.md.shopappjdbc.repository.contract.ClientRepository;
 import uz.md.shopappjdbc.repository.rowMapper.AccessKeyMapper;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,18 +47,27 @@ public class AccessKeyRepositoryImpl implements AccessKeyRepository {
                     entity.getValidTill(),
                     entity.getClient().getId(),
                     entity.getId());
+            return entity = findById(entity.getId()).orElse(null);
         } else {
-            jdbcTemplate.update(
-                    "insert into access_key(access, deleted, valid_till, client_id) " +
-                            "values (?,?,?,?)",
-                    entity.getAccess(),
-                    entity.isDeleted(),
-                    entity.getValidTill(),
-                    entity.getClient().getId()
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+
+            AccessKey finalEntity = entity;
+            jdbcTemplate.update(con -> {
+                        PreparedStatement ps = con.prepareStatement(
+                                "insert into access_key(access, deleted, valid_till, client_id) " +
+                                        "values (?,?,?,?)", new String[]{"id"});
+                        ps.setString(1, finalEntity.getAccess());
+                        ps.setBoolean(2, finalEntity.isDeleted());
+                        ps.setDate(3, Date.valueOf(finalEntity.getValidTill().toLocalDate()));
+                        return ps;
+                    },
+                    keyHolder
             );
+            if (keyHolder.getKey() == null)
+                throw new SQLException("CANNOT_SAVE_ENTITY");
+
+            return entity = findById(keyHolder.getKey().longValue()).orElse(null);
         }
-        entity = findByAccess(entity.getAccess()).orElse(null);
-        return entity;
     }
 
     @Override
@@ -73,13 +87,7 @@ public class AccessKeyRepositoryImpl implements AccessKeyRepository {
                 "select u.id from access_key u where (u.deleted = false) and u.id = ?",
                 new AccessKeyMapper(), id);
 
-        if (accessKey != null) {
-//            accessKey.setClient(clientRepository
-//                    .findById(accessKey.getClient().getId())
-//                    .orElseThrow(() -> new SQLException("CLIENT_NOT_FOUND")));
-            return Optional.of(accessKey);
-        }
-        return Optional.empty();
+        return Optional.ofNullable(accessKey);
     }
 
     @Override
@@ -93,11 +101,9 @@ public class AccessKeyRepositoryImpl implements AccessKeyRepository {
 
     @Override
     public List<AccessKey> findAll() {
-        List<AccessKey> query = jdbcTemplate.query(
+        return jdbcTemplate.query(
                 "select u.id from access_key u where (u.deleted = false)",
                 new AccessKeyMapper());
-//        setClient(query);
-        return query;
     }
 
     private void setClient(List<AccessKey> query) {
@@ -113,12 +119,10 @@ public class AccessKeyRepositoryImpl implements AccessKeyRepository {
     public List<AccessKey> findAllById(Iterable<Long> idList) {
         Assert.notNull(idList, "idList must not be null");
         String ids = RepositoryUtil.getAsString(idList);
-        List<AccessKey> query = jdbcTemplate.query(
+
+        return jdbcTemplate.query(
                 "select id from access_key where (deleted = false) and id in ?",
                 new AccessKeyMapper(), ids);
-
-//        setClient(query);
-        return query;
 
     }
 
@@ -177,10 +181,8 @@ public class AccessKeyRepositoryImpl implements AccessKeyRepository {
     @Override
     public List<AccessKey> findAllByClientId(Long id) {
         Assert.notNull(id, "id must not be null");
-        List<AccessKey> query = jdbcTemplate.query(
+        return jdbcTemplate.query(
                 "select * from access_key where client_id = ? and (deleted = false)",
                 new AccessKeyMapper(), id);
-//        setClient(query);
-        return query;
     }
 }

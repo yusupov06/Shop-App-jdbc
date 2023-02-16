@@ -1,12 +1,8 @@
 package uz.md.shopappjdbc.repository;
 
-import org.springframework.data.repository.NoRepositoryBean;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-@NoRepositoryBean
 public interface CrudRepository<T, ID> {
     T save(T entity);
 

@@ -3,7 +3,6 @@ package uz.md.shopappjdbc.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +19,8 @@ import uz.md.shopappjdbc.exceptions.NotEnabledException;
 import uz.md.shopappjdbc.exceptions.NotFoundException;
 import uz.md.shopappjdbc.repository.contract.RoleRepository;
 import uz.md.shopappjdbc.repository.contract.UserRepository;
+import uz.md.shopappjdbc.repository.impl.RoleRepositoryImpl;
+import uz.md.shopappjdbc.repository.impl.UserRepositoryImpl;
 import uz.md.shopappjdbc.service.contract.AuthService;
 
 import java.util.List;
@@ -33,9 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AuthServiceTest {
 
     private static final String DEFAULT_PHONE_NUMBER = "+998931668648";
-
     private static final String DEFAULT_FIRSTNAME = "Ali";
-
     private static final String DEFAULT_LASTNAME = "Yusupov";
     private static final String DEFAULT_PASSWORD = "123";
 
@@ -49,6 +48,7 @@ public class AuthServiceTest {
     private AuthService authService;
 
     private User user;
+
     @Autowired
     private RoleRepository roleRepository;
 
@@ -62,7 +62,9 @@ public class AuthServiceTest {
         user.setPhoneNumber(DEFAULT_PHONE_NUMBER);
         user.setFirstName(DEFAULT_FIRSTNAME);
         user.setLastName(DEFAULT_LASTNAME);
-        user.setRole(roleRepository.save(new Role("ADMIN2","develop", Set.of(PermissionEnum.values()))));
+        user.setRole(roleRepository
+                .save(new Role("ADMIN2", "develop",
+                        Set.of(PermissionEnum.values()))));
     }
 
     @Test

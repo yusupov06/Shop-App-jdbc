@@ -2,6 +2,7 @@ package uz.md.shopappjdbc.repository.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import uz.md.shopappjdbc.domain.Role;
@@ -66,7 +67,7 @@ public class UserRepositoryImpl implements UserRepository {
             role = entity.getRole();
         if (entity.getId() != null) {
             jdbcTemplate.update(
-                    "update  users set active = ?, added_at = ?, deleted= ?, enabled =?, first_name= ?, last_name=?, password=?, phone_number=?, role_id=? where id = ?",
+                    "update users set active = ?, added_at = ?, deleted= ?, enabled =?, first_name= ?, last_name=?, password=?, phone_number=?, role_id=? where id = ?",
                     entity.isActive(),
                     LocalDateTime.now(),
                     entity.isDeleted(),

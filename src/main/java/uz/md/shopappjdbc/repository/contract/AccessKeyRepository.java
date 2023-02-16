@@ -7,7 +7,6 @@ import uz.md.shopappjdbc.domain.AccessKey;
 import java.util.List;
 import java.util.Optional;
 
-@NoRepositoryBean
 public interface AccessKeyRepository extends CrudRepository<AccessKey, Long> {
     Optional<AccessKey> findByAccess(String access);
 

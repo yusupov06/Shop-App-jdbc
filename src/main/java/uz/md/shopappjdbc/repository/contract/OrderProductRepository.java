@@ -6,7 +6,6 @@ import uz.md.shopappjdbc.domain.OrderProduct;
 
 import java.util.List;
 
-@Repository
 public interface OrderProductRepository extends CrudRepository<OrderProduct, Long> {
 
     List<OrderProduct> findAllByOrderId(Long id);

@@ -7,7 +7,6 @@ import uz.md.shopappjdbc.domain.User;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface UserRepository extends CrudRepository<User, UUID> {
 
     Optional<User> findByPhoneNumber(String phoneNumber);
